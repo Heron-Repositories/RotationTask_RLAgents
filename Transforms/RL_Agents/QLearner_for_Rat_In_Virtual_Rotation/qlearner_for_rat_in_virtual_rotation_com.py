@@ -18,14 +18,14 @@ Exec = os.path.abspath(__file__)
 Properties of the generated Node
 """
 BaseName = 'Qlearner For Rat In Virtual Rotation'   # The base name can have spaces.
-NodeAttributeNames = ['Parameters', 'Action Out', 'Pixel Observation', 'Reward & Features Observation']
+NodeAttributeNames = ['Parameters', 'Start','Reward & Observations', 'Action']
 
-NodeAttributeType = ['Static', 'Output', 'Input', 'Input Dict']
+NodeAttributeType = ['Static', 'Input', 'Input Dict', 'Output']
 
-ParameterNames = ['Visualisation', 'Game', 'Observation Type']
-ParameterTypes = ['bool', 'str', 'list']
+ParameterNames = ['Visualisation', 'Agent']
+ParameterTypes = ['bool', 'str']
 
-ParametersDefaultValues = [False, 'TTM_FindReward', ['Pixels', 'Parameters', 'Everything']]
+ParametersDefaultValues = [False, 'TTM_FindReward']
 
 # The following line needs to exist with the correct name for the xxx_worker.py script
 WorkerDefaultExecutable = os.path.join(os.path.dirname(Exec), 'qlearner_for_rat_in_virtual_rotation_worker.py')

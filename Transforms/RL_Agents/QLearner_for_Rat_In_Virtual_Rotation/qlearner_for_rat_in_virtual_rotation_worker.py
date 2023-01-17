@@ -12,19 +12,21 @@ import numpy as np
 import copy
 from Heron.communication.socket_for_serialization import Socket
 from Heron import general_utils as gu, constants as ct
-import commands_to_unity as cu
 from Heron.gui.visualisation_dpg import VisualisationDPG
 
 visualisation_dpg: VisualisationDPG
 game: str
-observation_type: str
 initialised = False
 visualisation_on = False
+running = False
+latest_action_indices = [0, 0]
+latest_pixels: np.ndarray
+latest_features: dict
+latest_reward: int
 
 
 def get_parameters(_worker_object):
     global game
-    global observation_type
     global visualisation_dpg
     global visualisation_on
 
@@ -32,7 +34,6 @@ def get_parameters(_worker_object):
         parameters = _worker_object.parameters
         visualisation_on = parameters[0]
         game = parameters[1]
-        observation_type = parameters[2]
     except:
         return False
 
@@ -42,7 +43,7 @@ def get_parameters(_worker_object):
                                          _y_axis_base_label='Cumulative Reward',
                                          _base_plot_title='Cumulative Reward over Actions')
 
-    _worker_object.savenodestate_create_parameters_df(visualisation=visualisation_on, game=game, observation_type=observation_type)
+    _worker_object.savenodestate_create_parameters_df(visualisation=visualisation_on, game=game)
     return True
 
 
@@ -58,17 +59,37 @@ def initialise(_worker_object):
 def work_function(data, parameters, savenodestate_update_substate_df):
     global visualisation_on
     global observation_type
+    global running
+    global latest_action_indices
+    global latest_pixels
+    global latest_features
+    global latest_reward
 
+    print('====================')
     visualisation_dpg.visualisation_on = parameters[0]
 
-    topic = data[0]
+
+    topic = data[0].decode('utf-8')
+    print(topic)
+    observation_in = True
+    if 'Start' in topic:
+        running = True
+    if 'Observation' in topic:
+        observation_in = True
 
     message = data[1:]  # data[0] is the topic
     message = Socket.reconstruct_data_from_bytes_message(message)
 
-
-    # Generate the result
     result = [np.array([ct.IGNORE])]
+    if running:
+
+        possible_actions = ['Action=Move:Forwards', 'Action=Move:Back', 'Action=Rotate:CW', 'Action=Rotate:CCW']
+
+        action = np.random.choice(possible_actions)
+
+        result = [np.array([action])]
+
+        gu.accurate_delay(250)
 
     return result
 
@@ -76,7 +97,7 @@ def work_function(data, parameters, savenodestate_update_substate_df):
 # The on_end_of_life function must exist even if it is just a pass
 def on_end_of_life():
     if initialised:
-        cu.kill_unity()
+        pass
 
 
 if __name__ == "__main__":
